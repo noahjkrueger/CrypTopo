@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Meta Info -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Title and Favicon -->
+        <title>CrypTopo</title>
+        <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/favicon-16x16.png">
+        <!-- Our CSS -->
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <!-- Icons -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+        <!-- Bootsrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+        <!-- Our JS -->
+        <script src="js/main.js" defer></script>
+    </head>
+    <body>
+        <nav class="navbar fixed-bottom bg-body-tertiary">
+            <form class="container-fluid">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                    <input id="api_key" type="text" class="form-control" placeholder="NOWNodes API Key" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Provide an API key">
+                    <span class="input-group-text"><i class="bi bi-wallet2"></i></span>
+                    <input id="target_address" type="text" class="form-control" placeholder="Bitcoin Wallet Address" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Bitcoin Wallet of interest">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <select class="depth-select" id="depth" class="form-select" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Size of Search">
+                        <option value ="">Select Depth</option>
+                        <option value="6">5</option>
+                        <option value="5">4</option>
+                        <option value="4">3</option>
+                        <option value="3">2</option>
+                        <option value="2">1</option>
+                    </select>
+                    <button id="create-graph" type="button" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Create Graph">
+                        <span id="run-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                        <i id="run-icon" class="bi bi-eye button-icon"></i>Run
+                    </button>
+                    <button id="export" type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download JSON"><i class="bi bi-save button-icon"></i>Export</button>
+                </div>
+            </form>
+        </nav>
+        <main>
+            <div class="topology-wrapper">
+                <!--Off canvas display -->
+                <div class="offcanvas offcanvas-top" data-bs-backdrop="true" tabindex="-1" id="toggle-info" aria-labelledby="offcanvasScrollingLabel" style="height: 65vh;">
+                    <div class="offcanvas-header">
+                        <h5 id="off-title" class="offcanvas-title" id="offcanvasScrollingLabel"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <pre id="off-info" class="offcanvas-body"></pre>
+                </div>
+                <div id="topology-map" class="topology-map">
+                    <div id="instructions" class="instructions">
+                        <!-- First Card Row -->
+                        <div class="instruction-cards">
+                            <!-- Introduction Card -->
+                            <div class="card" style="width: 18rem;">
+                                <img src="img/logo_full.jpg" class="card-img-top" alt="CrypTopo Logo">
+                                <div class="card-body">
+                                    <h5 class="card-title">Welcome to CrypTopo!</h5>
+                                    <p class="card-text">
+                                        With blockchain transactions providing discreet and quick money movement, this technology can be used by bad actors
+                                        to sell illegal goods, launder money and scam. Traditional methods of following money on the blockchain can be tedious and ineffective.
+                                        This tool is designed to create a visual topological map of a segment of the Bitcoin Blockchain.
+                                        By providing an API key and a Bitcoin wallet address of interest, you can create a visual graph of where funds are moving!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Second Card Row -->
+                        <div class="instruction-cards">
+                            <!-- Documentation Card -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Using CrypTopo</h5>
+                                    <p class="card-text">Read the documentation about how to use CrypTopo! There is more than meets the eye!</p>
+                                    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#howto"><i class="bi bi-book button-icon"></i>Read More</button>
+                                </div>
+                            </div>
+                            <!-- API Card -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">NOWNodes API</h5>
+                                    <p class="card-text">CrypTopo utilizes NOWNodes API, so you will need to register a NOWNodes API Key.</p>
+                                    <a href="https://nownodes.io/" target="_blank" class="btn btn-dark"><i class="bi bi-key button-icon"></i>Get Key</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal with instructions -->
+                    <div class="modal fade" id="howto" tabindex="-1" aria-labelledby="howto" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="howto">CrypTopo Documentation</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    write this lmao
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Loading Screen -->
+                    <div id="loader" class="loader">
+                        <div class="spinner-border text-dark" role="status"></div>
+                        <div id="loading-msg" class="loading-text">loading</div>
+                    </div>
+                    <!-- Error Screen -->
+                    <div id="error" class="loader">
+                        <div class="spinner-grow text-danger" role="status"></div>
+                        <div id="error-msg" class="loading-text">ERROR</div>
+                    </div>
+                    <section id="svg"></section>
+                </div>
+            </div>
+        </main>
+        <!-- Popper Script -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
+        <!-- Bootstrap Script -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js" integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous"></script>
+        <!-- D3 Script -->
+        <script src='//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js'></script>
+    </body>
+</html>
