@@ -37,7 +37,7 @@ async function get_address(address, key) {
 /**
  * Query the API for information about a certian transaction.
  * 
- * @param {String} [txid] - The wallet address to be queried.
+ * @param {String} [txid] - The transaction to be queried.
  * @param {String} [key] - NOWNodes API key
  * @returns {Object} Details about the address, including transactions.
  */
@@ -62,7 +62,7 @@ async function get_transaction(txid, key) {
 /**
  * Find the destination of transaction. (where most of the money goes)
  * 
- * @param {String} [tx] - The wallet address to be queried.
+ * @param {String} [tx] - The transaction object.
  * @returns {Object} Details about the address, including transactions.
  */
 function find_destination(tx) {
@@ -103,7 +103,7 @@ async function generate_graph(key, orgin_address, depth, status) {
                 continue;
             }
             //Update status with what is happening
-            status.load_msg(`ID: ${address}`);
+            status.load_msg(`<i class="bi bi-wallet2"></i> ${address}`);
             //Get the information about this address, Add vertex to graph
             graph[address] = await get_address(address, key);
             //Dont bother looking at outer vertecies transactions
@@ -116,7 +116,7 @@ async function generate_graph(key, orgin_address, depth, status) {
             var explore_tx = graph[address]['txids'].slice(0, 10);
             for (var txid of explore_tx) {
                 //Update status with what is happening
-                status.load_msg(`Tx: ${txid}`);
+                status.load_msg(`<i class="bi bi-arrow-down-up"></i> ${txid}`);
                 transaction = await get_transaction(txid, key);
                 var dest = find_destination(transaction);
                 transaction['destination'] = dest;
@@ -194,39 +194,53 @@ class Status {
     }
 
     show_loading() {
+        //hide all but loading element
         this.loader.removeAttribute("hidden");
         this.svg.setAttribute("hidden", "1");
         this.instructions.setAttribute("hidden", "1");
         this.error.setAttribute("hidden", "1");
+        document.getElementById("toggle-info").classList.remove("show");
     }
 
-    load_msg(message) {
-        this.loading_txt.innerText = message;
+    load_msg(html) {
+        this.loading_txt.innerHTML = html;
     }
 
     show_instructions() {
+        //hide all but instruction element
         this.instructions.removeAttribute("hidden");
         this.svg.setAttribute("hidden", "1");
         this.loader.setAttribute("hidden", "1");
         this.error.setAttribute("hidden", "1");
+        document.getElementById("toggle-info").classList.remove("show");
     }
 
     show_svg() {
+        //hide all but info and svg elements
         this.svg.removeAttribute("hidden");
         this.loader.setAttribute("hidden", "1");
         this.instructions.setAttribute("hidden", "1");
         this.error.setAttribute("hidden", "1");
+        document.getElementById("toggle-info").classList.add("show");
+        var off_title = document.getElementById("off-title");
+        var off_info = document.getElementById("off-info");
+        off_title.innerHTML = `<i class="bi bi-mouse"></i> Select Node or Edge`;
+        off_info.innerHTML = `<i class="bi bi-info-circle"></i> Click to display details<br><br><i class="bi bi-info-circle"></i> <kbd>CTRL</kbd> + drag to move Nodes<br><br><i class="bi bi-info-circle"></i> This section is scrollable`;
     }
 
     async show_error(e) {
+        //hide all but error element
         this.error.removeAttribute("hidden");
         this.loader.setAttribute("hidden", "1");
         this.instructions.setAttribute("hidden", "1");
         this.svg.setAttribute("hidden", "1");
+        document.getElementById("toggle-info").classList.remove("show");
+        //display for 3 seconds
         for (let i = 3; i >= 0; i--) {
             this.error_txt.innerText = `(${i}) ${e}`;
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
+        //return to instruction page
         this.show_instructions();
     }
 }
@@ -316,7 +330,7 @@ init();
 function setGraph(nodes, links) {
     document.getElementById('svg').innerHTML = "";
     // set up SVG for D3
-    var width = document.getElementById('svg').parentElement.clientWidth;
+    var width = document.getElementById('svg').parentElement.clientWidth  * 7 / 10;
     var height = document.getElementById('svg').parentElement.clientHeight;
     var colors = d3.scale.category10();
 
@@ -374,7 +388,7 @@ function setGraph(nodes, links) {
         });
 
         // add new links
-        path.enter().append('svg:path').attr('class', 'link').attr("data-bs-toggle", "offcanvas").attr("data-bs-target", "#toggle-info").classed('selected', function(d) {
+        path.enter().append('svg:path').attr('class', 'link').classed('selected', function(d) {
             return d === selected_link;
         }).style('marker-end', function(d) {
             return 'url(#end-arrow)';
@@ -387,7 +401,7 @@ function setGraph(nodes, links) {
             selected_node = null;
             var off_title = document.getElementById("off-title");
             var off_info = document.getElementById("off-info");
-            off_title.innerText = `${d.source['address']} <-> ${d.target['address']}`;
+            off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.source.id}<br><i class="bi bi-arrow-down-up"></i><br><i class="bi bi-wallet2"></i> ${d.target.id}`;
             var html = "";
             for (const item of d.info) {
                 html = html.concat(JSON.stringify(item, undefined, 2));
@@ -411,7 +425,7 @@ function setGraph(nodes, links) {
         //data-bs-toggle="offcanvas" data-bs-target="#toggle-info"
         g.append('svg:circle').attr('class', 'node').attr('r', 12).attr('id', function(d) {
             return d.id;
-        }).attr("data-bs-toggle", "offcanvas").attr("data-bs-target", "#toggle-info").style('fill', function(d) {
+        }).style('fill', function(d) {
             return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id);
         }).style('stroke', function(d) {
             return d3.rgb(colors(d.id)).toString();
@@ -424,10 +438,9 @@ function setGraph(nodes, links) {
             if (mousedown_node === selected_node) selected_node = null;
             else selected_node = mousedown_node;
             selected_link = null;
-
             var off_title = document.getElementById("off-title");
             var off_info = document.getElementById("off-info");
-            off_title.innerText = `Wallet: ${d.id}`;
+            off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.id}`;
             off_info.innerHTML = JSON.stringify(d.info, undefined, 2);
             restart();
         });
