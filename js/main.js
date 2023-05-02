@@ -225,7 +225,8 @@ class Status {
         var off_title = document.getElementById("off-title");
         var off_info = document.getElementById("off-info");
         off_title.innerHTML = `<i class="bi bi-mouse"></i> Select Node or Edge`;
-        off_info.innerHTML = `<i class="bi bi-info-circle"></i> Click to display details<br><br><i class="bi bi-info-circle"></i> <kbd>CTRL</kbd> + drag to move Nodes<br><br><i class="bi bi-info-circle"></i> This section is scrollable`;
+        off_info.innerHTML = `<i class="bi bi-info-circle"></i> Click for details<br><br><i class="bi bi-info-circle"></i> Click`
+                                + ` + Drag to move Nodes<br><br><i class="bi bi-info-circle"></i> This section is scrollable`;
     }
 
     async show_error(e) {
@@ -250,6 +251,14 @@ class Status {
  * Initialize the WebApp
  */
 function init() {
+    // Enable ToolTips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+    //Set up renderJSON
+    renderjson.set_icons('►', '▼');
+    renderjson.set_show_to_level(1);
+    
     //create Loading object that handles loading messages
     var status = new Status();
     status.show_instructions();
@@ -298,7 +307,7 @@ function init() {
         }
         toggleRun();
         draw_graph(information, status);
-        document.getElementById(orgin).classList.add("start-node");
+        document.getElementById(orgin).setAttribute('r', 20);
     });
     //Listen for click on export button
     export_button.addEventListener("click", e => {
@@ -318,10 +327,6 @@ function init() {
         }
     });
 }
-
-// Enable ToolTips
-const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
 //initalize document
 init();
@@ -388,10 +393,8 @@ function setGraph(nodes, links) {
         });
 
         // add new links
-        path.enter().append('svg:path').attr('class', 'link').classed('selected', function(d) {
+        path.enter().append('svg:path').attr('class', 'link').style('marker-end', 'url(#end-arrow)').classed('selected', function(d) {
             return d === selected_link;
-        }).style('marker-end', function(d) {
-            return 'url(#end-arrow)';
         }).on('mousedown', function(d) {
             if (d3.event.ctrlKey) return;
             // select link
@@ -402,11 +405,10 @@ function setGraph(nodes, links) {
             var off_title = document.getElementById("off-title");
             var off_info = document.getElementById("off-info");
             off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.source.id}<br><i class="bi bi-arrow-down-up"></i><br><i class="bi bi-wallet2"></i> ${d.target.id}`;
-            var html = "";
+            off_info.innerHTML = "";
             for (const item of d.info) {
-                html = html.concat(JSON.stringify(item, undefined, 2));
+                off_info.appendChild(renderjson(item));
             }
-            off_info.innerHTML = html;
             restart();
         });
 
@@ -417,18 +419,15 @@ function setGraph(nodes, links) {
 
         // update existing nodes
         circle.selectAll('circle').style('fill', function(d) {
-            return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id);
+            return (d === selected_node) ? d3.rgb(colors(d.info.txs)).brighter().toString() : colors(d.info.txs);
         });
 
         // add new nodes
         var g = circle.enter().append('svg:g');
-        //data-bs-toggle="offcanvas" data-bs-target="#toggle-info"
-        g.append('svg:circle').attr('class', 'node').attr('r', 12).attr('id', function(d) {
+        g.append('svg:circle').style('stroke', "#000").attr('class', 'node').attr('r', 12).attr('id', function(d) {
             return d.id;
         }).style('fill', function(d) {
-            return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id);
-        }).style('stroke', function(d) {
-            return d3.rgb(colors(d.id)).toString();
+            return (d === selected_node) ? d3.rgb(colors(d.info.txs)).brighter().toString() : colors(d.info.txs);
         }).on('mousedown', function(d) {
             if (d3.event.ctrlKey) {
                 return;
@@ -441,28 +440,16 @@ function setGraph(nodes, links) {
             var off_title = document.getElementById("off-title");
             var off_info = document.getElementById("off-info");
             off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.id}`;
-            off_info.innerHTML = JSON.stringify(d.info, undefined, 2);
+            off_info.innerHTML = "";
+            off_info.appendChild(renderjson(d.info));
             restart();
         });
         // set the graph in motion
+        circle.call(force.drag);
         force.start();
     }
 
-    d3.select(window).on('keydown', function() {
-        // ctrl
-        if (d3.event.keyCode === 17) {
-        circle.call(force.drag);
-        svg.classed('ctrl', true);
-        }
-    }).on('keyup', function() {
-        // ctrl
-        if (d3.event.keyCode === 17) {
-        circle
-        .on('mousedown.drag', null)
-        .on('touchstart.drag', null);
-        svg.classed('ctrl', false);
-    }
-    }).on('resize', function() {
+    d3.select(window).on('resize', function() {
         svg.attr("width", document.getElementById('svg').offsetWidth);
         svg.attr("height", document.getElementById('svg').offsetHeight);
     });

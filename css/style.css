@@ -54,10 +54,6 @@ div[hidden] {
     width: 100vw;   
 }
 
-.start-node {
-    transform: scale(2);
-}
-
 svg {
   margin-left: 30vw;
   background-color: #FFF;
@@ -82,15 +78,7 @@ svg:not(.active):not(.ctrl) path.link {
 }
 
 path.link.selected {
-  stroke-dasharray: 10, 2;
-}
-
-path.link.dragline {
-  pointer-events: none;
-}
-
-path.link.hidden {
-  stroke-width: 0;
+  stroke-dasharray: 5, 2;
 }
 
 circle.node {
@@ -113,4 +101,43 @@ text.id {
   width: 30vw; 
   height: 96vh;
   border: none;
+}
+
+/* renderjson elements */
+.disclosure {
+  font-weight: 900;
+  text-decoration: none;
+  color: #000;
+}
+
+.syntax {
+  color: #000;
+}
+
+.string {
+  color: #ff0000;
+}
+
+.number {
+  color: #0000ff;
+}
+
+.boolean {
+  color: #0000ff;
+}
+
+.key {
+  color: #600060;
+}
+
+.keyword {
+  color: #800080;
+}
+
+.object.syntax {
+  color: inherit;
+}
+
+.array.syntax {
+ color: inherit;
 }
