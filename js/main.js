@@ -337,7 +337,7 @@ function setGraph(nodes, links) {
     // set up SVG for D3
     var width = document.getElementById('svg').parentElement.clientWidth  * 7 / 10;
     var height = document.getElementById('svg').parentElement.clientHeight;
-    var colors = d3.scale.category10();
+    var colors = d3.scale.category20();
 
     var svg = d3.select('#svg').append('svg').attr('oncontextmenu', 'return false;').attr('width', width).attr('height', height);
 
@@ -376,7 +376,7 @@ function setGraph(nodes, links) {
             return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
         });
         circle.attr('transform', function(d) {
-            return 'translate(' + d.x + ',' + d.y + ')';
+            return `translate(${Math.max(12, Math.min(width - 12, d.x))},${Math.max(12, Math.min(height - 12, d.y))})`;
         });
     }
 
@@ -419,7 +419,11 @@ function setGraph(nodes, links) {
 
         // update existing nodes
         circle.selectAll('circle').style('fill', function(d) {
-            return (d === selected_node) ? d3.rgb(colors(d.info.txs)).brighter().toString() : colors(d.info.txs);
+            var num = 260 - (10 * Math.floor(0.5 + Math.sqrt(d.info.txs)));
+            while (num < 0) {
+                num += 360;
+            }
+            return (d === selected_node) ? `hsl(${num}, 100%, 75%)`:`hsl(${num}, 100%, 50%)`;
         });
 
         // add new nodes
@@ -427,7 +431,11 @@ function setGraph(nodes, links) {
         g.append('svg:circle').style('stroke', "#000").attr('class', 'node').attr('r', 12).attr('id', function(d) {
             return d.id;
         }).style('fill', function(d) {
-            return (d === selected_node) ? d3.rgb(colors(d.info.txs)).brighter().toString() : colors(d.info.txs);
+            var num = 260 - (10 * Math.floor(0.5 + Math.sqrt(d.info.txs)));
+            while (num < 0) {
+                num += 360;
+            }
+            return (d === selected_node) ? `hsl(${num}, 100%, 75%)`:`hsl(${num}, 100%, 50%)`;
         }).on('mousedown', function(d) {
             if (d3.event.ctrlKey) {
                 return;
