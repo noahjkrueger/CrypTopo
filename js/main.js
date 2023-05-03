@@ -27,9 +27,9 @@ async function get_address(address, key) {
         default:
             throw new Error(response);
     }
+    //Parse data into Object
     const text = await response.text();
     var json = JSON.parse(text);
-    //Return the data
     return json;
 }
 
@@ -52,9 +52,9 @@ async function get_transaction(txid, key) {
       };
     //Query the API
     const response = await fetch(`https://btcbook.nownodes.io/api/v2/tx/${txid}`, requestOptions);
+    //Parse data into Object
     const text = await response.text();
     const json = JSON.parse(text);
-    //Return the data
     return json;
 }
 
@@ -141,36 +141,47 @@ async function generate_graph(key, orgin_address, depth, status) {
  * @param {Status} [status] - Object that controls view of site
  */
 function draw_graph(information, status){
-    if (information === {}) {
-        return;
-    }
-    //create nodes and links of graph
+    //Create nodes and links of graph, index them.
     var nodes = [];
     var nodex = [];
     var links = [];
     var linkdex = [];
+    //Also log information to console
     console.log(information);
+    //k is the wallet ID, v is the information queried by API
     for (const [k, v] of Object.entries(information)) {
         nodes.push({id: k, x: 0, y: 0, info: v});
+        //Index wallet ID
         nodex.push(k);
     }
+    //k is the wallet ID, v is the information queried by API
     for (const [k, v] of Object.entries(information)) {
+        //Iterate over the tranactions of this node
         for (const tx of v['transactions']) {
+            //Dont care about reflexive transactions - also, this would break the visual (not functionally, but lots of errors in console).
             if (tx['destination'] === k) {
                 continue;
             }
+            //Find index of node
             var tg = nodex.indexOf(tx['destination']);
+            //If there exists transaction between node and dest, it will be in lindex as either source||dest or dest||source
             var ldx = linkdex.indexOf(k.concat(tx['destination']));
             ldx = ldx === -1 ? linkdex.indexOf(tx['destination'].concat(k)) : -1;
+            //There is a transaction between the two
             if (ldx != -1) {
+                //move existing information over to new link
                 var new_info = links[ldx]["info"];
                 links[ldx]["info"] = [];
+                // and add the new information
                 new_info.push(tx);
                 links.push({source: nodes[tg], target: nodes[nodex.indexOf(k)], info: new_info});
+                //Note, we keep the old link as it may indicate back and forth transactions.
                 continue;
             }
+            //The destination is already on graph, add a link.
             if (tg != -1) {
                 links.push({source: nodes[nodex.indexOf(k)], target: nodes[tg], info: [tx]});
+                //add transaction to linkdex
                 linkdex.push(tx['destination'].concat(k));
             }
         }
@@ -182,60 +193,59 @@ function draw_graph(information, status){
     status.show_svg();
 }
 
-//Create Loading object to handle loading events
+//The Status Object controls what is displayed on screen
 class Status {
     constructor() {
+        //Get the elements we are controlling visability on
         this.loader = document.getElementById("loader");
         this.error = document.getElementById("error");
         this.loading_txt = document.getElementById("loading-msg");
         this.error_txt = document.getElementById("error-msg");
         this.svg = document.getElementById("svg");
         this.instructions = document.getElementById("instructions");
+        //Toggle info is a bootstrap element, has a class that we can utilize, so we will modify the classlist instead.
+        this.toggle_info = document.getElementById("toggle-info");
     }
 
+    //Only display the loading element
     show_loading() {
-        //hide all but loading element
         this.loader.removeAttribute("hidden");
         this.svg.setAttribute("hidden", "1");
         this.instructions.setAttribute("hidden", "1");
         this.error.setAttribute("hidden", "1");
-        document.getElementById("toggle-info").classList.remove("show");
+        this.toggle_info.classList.remove("show");
     }
 
+    //Modify what the loading element says
     load_msg(html) {
         this.loading_txt.innerHTML = html;
     }
 
+    //Only show the instructions (landing page)
     show_instructions() {
-        //hide all but instruction element
         this.instructions.removeAttribute("hidden");
         this.svg.setAttribute("hidden", "1");
         this.loader.setAttribute("hidden", "1");
         this.error.setAttribute("hidden", "1");
-        document.getElementById("toggle-info").classList.remove("show");
+        this.toggle_info.classList.remove("show");
     }
 
+    //Only show the graph (and info as it pertains to graph)
     show_svg() {
-        //hide all but info and svg elements
         this.svg.removeAttribute("hidden");
         this.loader.setAttribute("hidden", "1");
         this.instructions.setAttribute("hidden", "1");
         this.error.setAttribute("hidden", "1");
-        document.getElementById("toggle-info").classList.add("show");
-        var off_title = document.getElementById("off-title");
-        var off_info = document.getElementById("off-info");
-        off_title.innerHTML = `<i class="bi bi-mouse"></i> Select Node or Edge`;
-        off_info.innerHTML = `<i class="bi bi-info-circle"></i> Click for details<br><br><i class="bi bi-info-circle"></i> Click`
-                                + ` + Drag to move Nodes<br><br><i class="bi bi-info-circle"></i> This section is scrollable`;
+        this.toggle_info.classList.add("show");
     }
 
+    //Only show the error screen, for 3 seconds, with the error message. Then, return to landing page.
     async show_error(e) {
-        //hide all but error element
         this.error.removeAttribute("hidden");
         this.loader.setAttribute("hidden", "1");
         this.instructions.setAttribute("hidden", "1");
         this.svg.setAttribute("hidden", "1");
-        document.getElementById("toggle-info").classList.remove("show");
+        this.toggle_info.classList.remove("show");
         //display for 3 seconds
         for (let i = 3; i >= 0; i--) {
             this.error_txt.innerText = `(${i}) ${e}`;
@@ -248,12 +258,12 @@ class Status {
 
 
 /**
- * Initialize the WebApp
+ * Initialize the WebApp - enable tooltips, set up renderJSON, control object for document, event listeners.
  */
 function init() {
     // Enable ToolTips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
     //Set up renderJSON
     renderjson.set_icons('►', '▼');
@@ -270,53 +280,64 @@ function init() {
     var submit_button = document.getElementById("create-graph");
     var export_button = document.getElementById("export");
 
+    //Other elements to modify
+    let spinner = document.getElementById('run-spinner');
+    let icon = document.getElementById('run-icon');
+
     //the current information being displayed
     var information;
 
     function toggleRun() {
         submit_button.toggleAttribute("disabled");
-        let spinner = document.getElementById('run-spinner');
-        let icon = document.getElementById('run-icon');
         icon.toggleAttribute('hidden');
         spinner.toggleAttribute('hidden');
     }
 
-    //Add event listeners
     //Listen for click on generate button
     submit_button.addEventListener("click", async function (e) {
+        // Get parameter values
         let depth = depth_input.value;
         let orgin = wallet_input.value;
         let key = key_input.value;
+        //Disable Run button
         toggleRun();
+        // Check if parameters are filled
         if (!depth || !orgin || !key) {
+            //Show the error, Re-enable run button
             await status.show_error("Oops! Missing parameter(s). Make sure to set API Key, BTC Address and Depth!");
             toggleRun();
             return;
         }
+        // Warn user about losing unsaved data
         if (information) {
-            const response = window.confirm("Running will reset the graph. Are you sure?");
-            if (!response) return;
+            if (!window.confirm("Running will reset the graph. Are you sure?")) return;
         }
+        //Generate graph information, generate_graph throws errors based on response codes from API
         try {
             information = await generate_graph(key, orgin, parseInt(depth), status);
         }
         catch(e) {
+            //Display the error, Re-enable run button
             await status.show_error(e);
             toggleRun();
             return;
         }
+        //Re-enable run button
         toggleRun();
+        //Draw the graph
         draw_graph(information, status);
+        //Enlarge starting node
         document.getElementById(orgin).setAttribute('r', 20);
     });
     //Listen for click on export button
-    export_button.addEventListener("click", e => {
+    export_button.addEventListener("click", async (e) => {
+        //Error if there is no information to save.
         if (!information) {
-            window.alert("Oops! Nothing to export. Run a search first!");
+            await status.show_error("There is no information to save. Run a search first!");
             return;
         }
         else {
-            //Create and download JSON Obj trick
+            //Create and download JSON Object trick
             var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(information));
             var downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
@@ -333,12 +354,14 @@ init();
 
 
 function setGraph(nodes, links) {
+    // Clear out contents of the svg element
     document.getElementById('svg').innerHTML = "";
-    // set up SVG for D3
+
+    //Calculate the area it covers - we want with to be 70% of the screen as the information aside is 30%
     var width = document.getElementById('svg').parentElement.clientWidth  * 7 / 10;
     var height = document.getElementById('svg').parentElement.clientHeight;
-    var colors = d3.scale.category20();
 
+    //init svg element for D3
     var svg = d3.select('#svg').append('svg').attr('oncontextmenu', 'return false;').attr('width', width).attr('height', height);
 
     // init D3 force layout
@@ -375,12 +398,13 @@ function setGraph(nodes, links) {
             targetY = d.target.y - (targetPadding * normY);
             return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
         });
+        //Move the circles each tick, bounded by sice of parenet element
         circle.attr('transform', function(d) {
             return `translate(${Math.max(12, Math.min(width - 12, d.x))},${Math.max(12, Math.min(height - 12, d.y))})`;
         });
     }
 
-    // update graph (called when needed)
+    // update graph
     function restart() {
         // path (link) group
         path = path.data(links);
@@ -402,28 +426,39 @@ function setGraph(nodes, links) {
             if (mousedown_link === selected_link) selected_link = null;
             else selected_link = mousedown_link;
             selected_node = null;
+            //Update the aside to reflect the information in the selected link
             var off_title = document.getElementById("off-title");
             var off_info = document.getElementById("off-info");
+            //Title element of aside
             off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.source.id}<br><i class="bi bi-arrow-down-up"></i><br><i class="bi bi-wallet2"></i> ${d.target.id}`;
+            //Reset the inner HTML of the aside body
             off_info.innerHTML = "";
+            //There may be multiple information objects, append them all
             for (const item of d.info) {
                 off_info.appendChild(renderjson(item));
             }
+            //Update the graph to reflect selection
             restart();
         });
 
-        // circle (node) group
+        // circle (node) group - known by ID!
         circle = circle.data(nodes, function(d) {
             return d.id;
         });
 
-        // update existing nodes
-        circle.selectAll('circle').style('fill', function(d) {
-            var num = 260 - (10 * Math.floor(0.5 + Math.sqrt(d.info.txs)));
-            while (num < 0) {
-                num += 360;
+        //Function for calculating the h value for HSL (bad attempt at heatmap lol)
+        function get_hval(d) {
+            var hval = 260 - (10 * Math.floor(0.5 + Math.sqrt(d.info.txs)));
+            while (hval < 0) {
+                hval += 360;
             }
-            return (d === selected_node) ? `hsl(${num}, 100%, 75%)`:`hsl(${num}, 100%, 50%)`;
+            //If this is the currently selected node, brighten it
+            return (d === selected_node) ? `hsl(${hval}, 100%, 75%)`:`hsl(${hval}, 100%, 50%)`;
+        }
+
+        // update existing nodes
+        circle.selectAll('circle').style('fill', function(d) {            
+            return get_hval(d);
         });
 
         // add new nodes
@@ -431,36 +466,26 @@ function setGraph(nodes, links) {
         g.append('svg:circle').style('stroke', "#000").attr('class', 'node').attr('r', 12).attr('id', function(d) {
             return d.id;
         }).style('fill', function(d) {
-            var num = 260 - (10 * Math.floor(0.5 + Math.sqrt(d.info.txs)));
-            while (num < 0) {
-                num += 360;
-            }
-            return (d === selected_node) ? `hsl(${num}, 100%, 75%)`:`hsl(${num}, 100%, 50%)`;
+            return get_hval(d);
         }).on('mousedown', function(d) {
-            if (d3.event.ctrlKey) {
-                return;
-            }
             // select node
             mousedown_node = d;
             if (mousedown_node === selected_node) selected_node = null;
             else selected_node = mousedown_node;
             selected_link = null;
+            //Update the aside to reflect the information in the selected node
             var off_title = document.getElementById("off-title");
             var off_info = document.getElementById("off-info");
             off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.id}`;
             off_info.innerHTML = "";
             off_info.appendChild(renderjson(d.info));
+            //Update the graph to reflect selection
             restart();
         });
-        // set the graph in motion
+        // set the graph in motion, allow users to drag nodes
         circle.call(force.drag);
         force.start();
     }
-
-    d3.select(window).on('resize', function() {
-        svg.attr("width", document.getElementById('svg').offsetWidth);
-        svg.attr("height", document.getElementById('svg').offsetHeight);
-    });
-
+    //Start the graph
     restart();   
 }

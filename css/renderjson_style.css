@@ -1,0 +1,37 @@
+.disclosure {
+    font-weight: 900;
+    text-decoration: none;
+    color: #000;
+}
+
+.syntax {
+    color: #000;
+}
+
+.string {
+    color: #ff0000;
+}
+
+.number {
+    color: #0000ff;
+}
+
+.boolean {
+    color: #0000ff;
+}
+
+.key {
+    color: #600060;
+}
+
+.keyword {
+    color: #800080;
+}
+
+.object.syntax {
+    color: inherit;
+}
+
+.array.syntax {
+    color: inherit;
+}

@@ -9,7 +9,9 @@
         <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/favicon-16x16.png">
         <!-- Our CSS -->
-        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="css/ui_style.css">
+        <link rel="stylesheet" type="text/css" href="css/graph_style.css">
+        <link rel="stylesheet" type="text/css" href="css/renderjson_style.css">
         <!-- Icons -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
         <!-- Bootsrap CSS -->
@@ -18,6 +20,7 @@
         <script src="js/main.js" defer></script>
     </head>
     <body>
+        <!-- Bottom Navigation Bar -->
         <nav class="navbar fixed-bottom bg-body-tertiary">
             <form class="container-fluid">
                 <div class="input-group">
@@ -43,15 +46,26 @@
             </form>
         </nav>
         <main>
+            <!-- The Main Screen -->
             <div class="topology-wrapper">
                 <!--Off canvas display -->
                 <div class="offcanvas offcanvas-start offcanvas-style" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="toggle-info" aria-labelledby="offcanvasScrollingLabel">
                     <div class="offcanvas-header">
-                       <h5 id="off-title" class="offcanvas-title" id="offcanvasScrollingLabel"></h5></i>
+                       <h5 id="off-title" class="offcanvas-title" id="offcanvasScrollingLabel">
+                            <i class="bi bi-mouse"></i> Select Node or Edge
+                        </h5>
                     </div>
-                    <div id="off-info" class="offcanvas-body"></div>
+                    <div id="off-info" class="offcanvas-body">
+                        <i class="bi bi-info-circle"></i> Click for details
+                        <br><br>
+                        <i class="bi bi-info-circle"></i> Click + Drag to move Nodes
+                        <br><br>
+                        <i class="bi bi-info-circle"></i> This section is scrollable
+                    </div>
                 </div>
+                <!-- Graph Canvas -->
                 <div id="topology-map" class="topology-map">
+                    <!-- Instruction Screen -->
                     <div id="instructions" class="instructions">
                         <!-- First Card Row -->
                         <div class="instruction-cards">
@@ -89,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Modal with instructions -->
+                    <!-- Modal with Documentation -->
                     <div class="modal fade" id="howto" tabindex="-1" aria-labelledby="howto" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
                             <div class="modal-content">
@@ -113,6 +127,7 @@
                         <div class="spinner-grow text-danger" role="status"></div>
                         <div id="error-msg" class="loading-text">ERROR</div>
                     </div>
+                    <!-- Actual Graph -->
                     <section id="svg"></section>
                 </div>
             </div>
