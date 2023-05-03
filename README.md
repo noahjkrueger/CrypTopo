@@ -20,6 +20,7 @@ on the left hand side which includes balance, addresss, transactions, etc.
 
 ## Graph Intepretation
 From an initial glance at the graph, there are two things that stand out - the node sizes and 
-colors. The larger node is the root node that represents the wallet used to complete the search.
+colors. The larger node is the root node that represents the wallet used to complete the search
+, while the smaller nodes are all the wallets that have connections to the root.
 The different colors of nodes are representative of the number of transactions (warmer colored 
 nodes represent wallets with a higher number of transactions). 
