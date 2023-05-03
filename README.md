@@ -13,7 +13,7 @@ per day, however, local testing has not been able to exceed this limit.
 The application is deployed at [cryptopo.netlify.app](https://cryptopo.netlify.app/). Using 
 your API key as well as a valid Bitcoin wallet address, you can visualize and analyze the flow 
 of crpyto up to a depth of 5. Ensure that both the API key and Bitcoin wallet address are
-valid. \n
+valid. <br>
 After graph creation, one can now move around nodes (which are representative of wallets) by 
 simply dragging the nodes. Clicking on nodes will bring up relevant information about the wallet
 on the left hand side which includes balance, addresss, transactions, etc. 
