@@ -1,6 +1,6 @@
 # CrypTopo
 Topology Mapper for Bitcoin Blockchain.
-This projects allows for a user to create a graphical representation of Bitcoin transactions 
+This application allows for a user to create a graphical representation of Bitcoin transactions 
 from a certain Bitcoin wallet.
 
 ## Requirements
