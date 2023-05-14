@@ -448,7 +448,7 @@ function setGraph(nodes, links) {
 
         //Function for calculating the h value for HSL (bad attempt at heatmap lol)
         function get_hval(d) {
-            var hval = 260 - (10 * Math.floor(0.5 + Math.sqrt(d.info.txs)));
+            var hval = 260 - (5 * Math.floor(Math.sqrt(d.info.txs + 10000) + 0.5 - Math.sqrt(10000)));
             while (hval < 0) {
                 hval += 360;
             }
