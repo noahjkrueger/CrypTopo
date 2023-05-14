@@ -169,18 +169,14 @@ function draw_graph(information, status){
             ldx = ldx === -1 ? linkdex.indexOf(tx['destination'].concat(k)) : -1;
             //There is a transaction between the two
             if (ldx != -1) {
-                //move existing information over to new link
-                var new_info = links[ldx]["info"];
-                links[ldx]["info"] = [];
                 // and add the new information
-                new_info.push(tx);
-                links.push({source: nodes[tg], target: nodes[nodex.indexOf(k)], info: new_info});
-                //Note, we keep the old link as it may indicate back and forth transactions.
+                links[ldx]["info"].push(tx);
+                links[ldx].bi = true;
                 continue;
             }
             //The destination is already on graph, add a link.
-            if (tg != -1) {
-                links.push({source: nodes[nodex.indexOf(k)], target: nodes[tg], info: [tx]});
+            else if (tg != -1) {
+                links.push({source: nodes[nodex.indexOf(k)], target: nodes[tg], info: [tx], dist: 75, bi: false});
                 //add transaction to linkdex
                 linkdex.push(tx['destination'].concat(k));
             }
@@ -365,10 +361,13 @@ function setGraph(nodes, links) {
     var svg = d3.select('#svg').append('svg').attr('oncontextmenu', 'return false;').attr('width', width).attr('height', height);
 
     // init D3 force layout
-    var force = d3.layout.force().nodes(nodes).links(links).size([width, height]).linkDistance(75).charge(-200).on('tick', tick);
+    var force = d3.layout.force().nodes(nodes).links(links).size([width, height]).charge(-200).on('tick', tick).linkDistance(function(d) {
+        return d.dist;
+    });
 
     // define arrow markers for graph links
     svg.append('svg:defs').append('svg:marker').attr('id', 'end-arrow').attr('viewBox', '0 -5 10 10').attr('refX', 6).attr('markerWidth', 3).attr('markerHeight', 3).attr('orient', 'auto').append('svg:path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#000');
+    svg.append('svg:defs').append('svg:marker').attr('id', 'start-arrow').attr('viewBox', '0 -5 10 10').attr('refX', 4).attr('markerWidth', 3).attr('markerHeight', 3).attr('orient', 'auto').append('svg:path').attr('d', 'M10,-5L0,0L10,5').attr('fill', '#000');
 
     // handles to link and node element groups
     var path = svg.append('svg:g').selectAll('path');
@@ -412,12 +411,15 @@ function setGraph(nodes, links) {
         // update existing links
         path.classed('selected', function(d) {
             return d === selected_link;
-        }).style('marker-end', function() {
-            return 'url(#end-arrow)';
-        });
+        }).style('marker-start', function(d) {
+            return d.bi ? 'url(#start-arrow)': '';
+        }).style('marker-end', 'url(#end-arrow)');
 
         // add new links
-        path.enter().append('svg:path').attr('class', 'link').style('marker-end', 'url(#end-arrow)').classed('selected', function(d) {
+        path.enter().append('svg:path').attr('class', 'link').style('marker-start', function(d) {
+            return d.bi ? 'url(#start-arrow)': '';
+        }).style('marker-end', 'url(#end-arrow)')
+        .classed('selected', function(d) {
             return d === selected_link;
         }).on('mousedown', function(d) {
             if (d3.event.ctrlKey) return;
