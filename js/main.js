@@ -307,7 +307,10 @@ function init() {
         }
         // Warn user about losing unsaved data
         if (information) {
-            if (!window.confirm("Running will reset the graph. Are you sure?")) return;
+            if (!window.confirm("Running will reset the graph. Are you sure?")) {
+                toggleRun();
+                return;
+            }
         }
         //Generate graph information, generate_graph throws errors based on response codes from API
         try {
@@ -436,9 +439,6 @@ function setGraph(nodes, links) {
             off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.source.id}<br><i class="bi bi-arrow-down-up"></i><br><i class="bi bi-wallet2"></i> ${d.target.id}`;
             //Reset the inner HTML of the aside body
             off_info.innerHTML = "";
-            if (d.info.length > 1) {
-                console.log()
-            }
             //There may be multiple information objects, append them all
             for (const item of d.info) {
                 off_info.appendChild(renderjson(item));
