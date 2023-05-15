@@ -165,17 +165,18 @@ function draw_graph(information, status){
             //Find index of node
             var tg = nodex.indexOf(tx['destination']);
             //If there exists transaction between node and dest, it will be in lindex as either source||dest or dest||source
-            var ldx = linkdex.indexOf(k.concat(tx['destination']));
-            ldx = ldx === -1 ? linkdex.indexOf(tx['destination'].concat(k)) : -1;
+            var ldx1 = linkdex.indexOf(k.concat(tx['destination']));
+            var ldx2 =linkdex.indexOf(tx['destination'].concat(k));
             //There is a transaction between the two
-            if (ldx != -1) {
+            if (ldx1 != -1 || ldx2 != -1) {
+                var ldx = Math.max(ldx1, ldx2);
                 // and add the new information
-                links[ldx]["info"].push(tx);
-                links[ldx].bi = true;
+                links[ldx].info.push(tx);
+                links[ldx].bi = links[ldx].bi ? true: ldx === ldx1 ? true : false;
                 continue;
             }
             //The destination is already on graph, add a link.
-            else if (tg != -1) {
+            if (tg != -1) {
                 links.push({source: nodes[nodex.indexOf(k)], target: nodes[tg], info: [tx], dist: 75, bi: false});
                 //add transaction to linkdex
                 linkdex.push(tx['destination'].concat(k));
@@ -435,6 +436,9 @@ function setGraph(nodes, links) {
             off_title.innerHTML = `<i class="bi bi-wallet2"></i> ${d.source.id}<br><i class="bi bi-arrow-down-up"></i><br><i class="bi bi-wallet2"></i> ${d.target.id}`;
             //Reset the inner HTML of the aside body
             off_info.innerHTML = "";
+            if (d.info.length > 1) {
+                console.log()
+            }
             //There may be multiple information objects, append them all
             for (const item of d.info) {
                 off_info.appendChild(renderjson(item));
@@ -451,9 +455,7 @@ function setGraph(nodes, links) {
         //Function for calculating the h value for HSL (bad attempt at heatmap lol)
         function get_hval(d) {
             var hval = 260 - (5 * Math.floor(Math.sqrt(d.info.txs + 10000) + 0.5 - Math.sqrt(10000)));
-            while (hval < 0) {
-                hval += 360;
-            }
+            hval = hval < 0 ? 360 : hval;
             //If this is the currently selected node, brighten it
             return (d === selected_node) ? `hsl(${hval}, 100%, 75%)`:`hsl(${hval}, 100%, 50%)`;
         }
