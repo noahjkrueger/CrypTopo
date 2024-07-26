@@ -22,6 +22,10 @@ div[hidden] {
   background-color: #FFF;
 }
 
+.input-element {
+  display: flex;
+}
+
 .instructions {
   padding-top: 5vh;
   background-color: #F8F8F8;
@@ -59,4 +63,29 @@ div[hidden] {
   width: 30vw;
   height: 96vh;
   border: none;
+}
+
+@media (max-width: 800px) {
+  .instructions {
+    padding-top: 0;
+  }
+  
+  .instruction-cards {
+    width: 100vw;
+  }
+
+  .instruction-cards-bottom {
+    padding-bottom: 15vh;
+  }
+
+  .input-element {
+    width: 100vw;
+  }
+
+  .depth-select {
+    width: 40vw;
+    margin-right: 1vw;
+  }
+
+  
 }

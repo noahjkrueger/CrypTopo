@@ -22,15 +22,19 @@
     <body>
         <!-- Bottom Navigation Bar -->
         <nav class="navbar fixed-bottom bg-body-tertiary">
-            <form class="container-fluid">
-                <div class="input-group">
+            <form class="container-fluid input-group">
+                <div class="input-element">
                     <span class="input-group-text"><i class="bi bi-key"></i></span>
                     <input id="api_key" type="text" class="form-control" placeholder="NOWNodes API Key" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Provide an API key">
+                </div>
+                <div class="input-element">
                     <span class="input-group-text"><i class="bi bi-wallet2"></i></span>
                     <input id="target_address" type="text" class="form-control" placeholder="Bitcoin Wallet Address" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Bitcoin Wallet of interest">
+                </div>
+                <div class="input-element">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <select class="depth-select" id="depth" class="form-select" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Size of Search">
-                        <option value ="">Select Depth</option>
+                        <option value ="">Depth</option>
                         <option value="6">5</option>
                         <option value="5">4</option>
                         <option value="4">3</option>
@@ -70,7 +74,7 @@
                         <!-- First Card Row -->
                         <div class="instruction-cards">
                             <!-- Introduction Card -->
-                            <div class="card" style="width: 18rem;">
+                            <div class="card">
                                 <img src="img/logo.png" class="card-img-top" alt="CrypTopo Logo">
                                 <div class="card-body">
                                     <h5 class="card-title">Welcome to CrypTopo!</h5>
@@ -84,7 +88,7 @@
                             </div>
                         </div>
                         <!-- Second Card Row -->
-                        <div class="instruction-cards">
+                        <div class="instruction-cards instruction-cards-bottom">
                             <!-- Documentation Card -->
                             <div class="card">
                                 <div class="card-body">
