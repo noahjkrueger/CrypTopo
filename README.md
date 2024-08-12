@@ -10,7 +10,7 @@ an account at [NOWNodes](https://nownodes.io/). Note that this key is good for 1
 per day, however, local testing has not been able to exceed this limit.
 
 ## Usage
-The application is deployed at [cryptopo.netlify.app](https://cryptopo.netlify.app/). Using 
+The application is deployed at [cryptopo.noahnoah.net](https://cryptopo.noahnoah.net/). Using 
 your API key as well as a valid Bitcoin wallet address, you can visualize and analyze the flow 
 of crypto up to a depth of 5. Ensure that both the API key and Bitcoin wallet address are
 valid. <br>
